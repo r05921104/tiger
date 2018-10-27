@@ -45,6 +45,10 @@ public class MethodTable
     return this.table.get(id);
   }
 
+  public void clear() {
+    this.table.clear();
+  }
+  
   public void dump()
   {
     new Todo();
