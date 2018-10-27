@@ -19,7 +19,7 @@ int main (int argc, char **argv)
   // Your code here:
   
   // initialize the Java heap
-  Tiger_heap_init (Control_heapSize);
+  Tiger_heap_init (200);
 
   // enter Java code...
   Tiger_main ();
