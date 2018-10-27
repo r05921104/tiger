@@ -12,4 +12,7 @@ javac -sourcepath src -d bin src/Tiger.java
 # Test the lexer
 java -cp bin Tiger ./test/Factorial.java -testlexer
 
+# Print the AST
+java -cp bin Tiger <inputFile> -dump ast
+
 ```
