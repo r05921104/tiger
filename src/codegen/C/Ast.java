@@ -195,10 +195,17 @@ public class Ast
     public static class Id extends T
     {
       public String id;
+      public boolean isField;
 
       public Id(String id)
       {
         this.id = id;
+      }
+
+      public Id(String id, boolean isField)
+      {
+        this.id = id;
+        this.isField = isField;
       }
 
       @Override
@@ -385,11 +392,19 @@ public class Ast
     {
       public String id;
       public Exp.T exp;
+      public boolean isField;
 
       public Assign(String id, Exp.T exp)
       {
         this.id = id;
         this.exp = exp;
+      }
+
+      public Assign(String id, Exp.T exp, boolean isField)
+      {
+        this.id = id;
+        this.exp = exp;
+        this.isField = isField;
       }
 
       @Override
@@ -404,12 +419,21 @@ public class Ast
       public String id;
       public Exp.T index;
       public Exp.T exp;
+      public boolean isField;
 
       public AssignArray(String id, Exp.T index, Exp.T exp)
       {
         this.id = id;
         this.index = index;
         this.exp = exp;
+      }
+
+      public AssignArray(String id, Exp.T index, Exp.T exp, boolean isField)
+      {
+        this.id = id;
+        this.index = index;
+        this.exp = exp;
+        this.isField = isField;
       }
 
       @Override
@@ -532,11 +556,12 @@ public class Ast
     {
       public String id; // name of the class
       public java.util.ArrayList<codegen.C.Ftuple> ms; // all methods
-
-      public VtableSingle(String id, ArrayList<codegen.C.Ftuple> ms)
+      public LinkedList<Tuple> class_fields;
+      public VtableSingle(String id, ArrayList<codegen.C.Ftuple> ms, LinkedList<Tuple> class_fields)
       {
         this.id = id;
         this.ms = ms;
+        this.class_fields = class_fields;
       }
 
       @Override

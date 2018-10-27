@@ -6,11 +6,17 @@ import codegen.C.Ast.Class;
 import codegen.C.Ast.Class.ClassSingle;
 import codegen.C.Ast.Dec;
 import codegen.C.Ast.Exp;
+import codegen.C.Ast.Exp.Add;
+import codegen.C.Ast.Exp.And;
+import codegen.C.Ast.Exp.ArraySelect;
 import codegen.C.Ast.Exp.Call;
 import codegen.C.Ast.Exp.Id;
+import codegen.C.Ast.Exp.Length;
 import codegen.C.Ast.Exp.Lt;
+import codegen.C.Ast.Exp.NewIntArray;
 import codegen.C.Ast.Exp.NewObject;
 import codegen.C.Ast.Exp.Num;
+import codegen.C.Ast.Exp.Not;
 import codegen.C.Ast.Exp.Sub;
 import codegen.C.Ast.Exp.This;
 import codegen.C.Ast.Exp.Times;
@@ -22,8 +28,11 @@ import codegen.C.Ast.Program;
 import codegen.C.Ast.Program.ProgramSingle;
 import codegen.C.Ast.Stm;
 import codegen.C.Ast.Stm.Assign;
+import codegen.C.Ast.Stm.AssignArray;
+import codegen.C.Ast.Stm.Block;
 import codegen.C.Ast.Stm.If;
 import codegen.C.Ast.Stm.Print;
+import codegen.C.Ast.Stm.While;
 import codegen.C.Ast.Type;
 import codegen.C.Ast.Type.ClassType;
 import codegen.C.Ast.Vtable;
@@ -75,16 +84,34 @@ public class TranslateVisitor implements ast.Visitor
   @Override
   public void visit(ast.Ast.Exp.Add e)
   {
+    e.left.accept(this);
+    Exp.T left = this.exp;
+    e.right.accept(this);
+    Exp.T right = this.exp;
+    this.exp = new Add(left, right);
+    return;
   }
 
   @Override
   public void visit(ast.Ast.Exp.And e)
   {
+    e.left.accept(this);
+    Exp.T left = this.exp;
+    e.right.accept(this);
+    Exp.T right = this.exp;
+    this.exp = new And(left, right);
+    return;
   }
 
   @Override
   public void visit(ast.Ast.Exp.ArraySelect e)
   {
+    e.array.accept(this);
+    Exp.T array = this.exp;
+    e.index.accept(this);
+    Exp.T index = this.exp;
+    this.exp = new ArraySelect(array, index);
+    return;
   }
 
   @Override
@@ -106,18 +133,22 @@ public class TranslateVisitor implements ast.Visitor
   @Override
   public void visit(ast.Ast.Exp.False e)
   {
+    this.exp = new Num(0);
   }
 
   @Override
   public void visit(ast.Ast.Exp.Id e)
   {
-    this.exp = new Id(e.id);
+    this.exp = new Id(e.id, e.isField);
     return;
   }
 
   @Override
   public void visit(ast.Ast.Exp.Length e)
   {
+    e.array.accept(this);
+    this.exp = new Length(this.exp);
+    return;
   }
 
   @Override
@@ -134,6 +165,9 @@ public class TranslateVisitor implements ast.Visitor
   @Override
   public void visit(ast.Ast.Exp.NewIntArray e)
   {
+    e.exp.accept(this);
+    this.exp = new NewIntArray(this.exp);
+    return;
   }
 
   @Override
@@ -146,6 +180,9 @@ public class TranslateVisitor implements ast.Visitor
   @Override
   public void visit(ast.Ast.Exp.Not e)
   {
+    e.exp.accept(this);
+    this.exp = new Not(this.exp);
+    return;
   }
 
   @Override
@@ -187,6 +224,8 @@ public class TranslateVisitor implements ast.Visitor
   @Override
   public void visit(ast.Ast.Exp.True e)
   {
+    this.exp = new Num(1);
+    return;
   }
 
   // //////////////////////////////////////////////
@@ -195,18 +234,32 @@ public class TranslateVisitor implements ast.Visitor
   public void visit(ast.Ast.Stm.Assign s)
   {
     s.exp.accept(this);
-    this.stm = new Assign(s.id, this.exp);
+    this.stm = new Assign(s.id, this.exp, s.isField);
     return;
   }
 
   @Override
   public void visit(ast.Ast.Stm.AssignArray s)
   {
+    s.index.accept(this);
+    Exp.T index = this.exp;
+    s.exp.accept(this);
+    Exp.T _exp = this.exp;
+    this.stm = new AssignArray(s.id, index, _exp, s.isField);
+    return;
   }
 
   @Override
   public void visit(ast.Ast.Stm.Block s)
   {
+    LinkedList<ast.Ast.Stm.T> list = s.stms;
+    LinkedList<Stm.T> new_list = new LinkedList<Stm.T>();
+    for (ast.Ast.Stm.T stm : list) {
+      stm.accept(this);
+      new_list.add(this.stm);
+    }
+    this.stm = new Block(new_list);
+    return;
   }
 
   @Override
@@ -233,6 +286,12 @@ public class TranslateVisitor implements ast.Visitor
   @Override
   public void visit(ast.Ast.Stm.While s)
   {
+    s.condition.accept(this);
+    Exp.T condition = this.exp;
+    s.body.accept(this);
+    Stm.T body = this.stm;
+    this.stm = new While(condition, body);
+    return;
   }
 
   // ///////////////////////////////////////////
@@ -240,11 +299,15 @@ public class TranslateVisitor implements ast.Visitor
   @Override
   public void visit(ast.Ast.Type.Boolean t)
   {
+    // C does not have boolean type, 
+    // therefore here we use the int to represent boolean
+    this.type = new Type.Int();
   }
 
   @Override
   public void visit(ast.Ast.Type.ClassType t)
   {
+    this.type = new ClassType(t.id);
   }
 
   @Override
@@ -256,6 +319,7 @@ public class TranslateVisitor implements ast.Visitor
   @Override
   public void visit(ast.Ast.Type.IntArray t)
   {
+    this.type = new Type.IntArray();
   }
 
   // ////////////////////////////////////////////////
@@ -273,9 +337,13 @@ public class TranslateVisitor implements ast.Visitor
   public void visit(ast.Ast.Method.MethodSingle m)
   {
     this.tmpVars = new LinkedList<Dec.T>();
+    // Get the return type from the Minijava AST and create
+    // the corresponding type of C AST.
     m.retType.accept(this);
     Type.T newRetType = this.type;
+
     LinkedList<Dec.T> newFormals = new LinkedList<Dec.T>();
+    // The first parameter of the method in C AST is the "this" of the class "id"
     newFormals.add(new Dec.DecSingle(
         new ClassType(this.classId), "this"));
     for (ast.Ast.Dec.T d : m.formals) {
@@ -308,7 +376,7 @@ public class TranslateVisitor implements ast.Visitor
   {
     ClassBinding cb = this.table.get(c.id);
     this.classes.add(new ClassSingle(c.id, cb.fields));
-    this.vtables.add(new VtableSingle(c.id, cb.methods));
+    this.vtables.add(new VtableSingle(c.id, cb.methods, cb.fields));
     this.classId = c.id;
     for (ast.Ast.Method.T m : c.methods) {
       m.accept(this);
@@ -324,10 +392,11 @@ public class TranslateVisitor implements ast.Visitor
     ClassBinding cb = this.table.get(c.id);
     Class.T newc = new ClassSingle(c.id, cb.fields);
     this.classes.add(newc);
-    this.vtables.add(new VtableSingle(c.id, cb.methods));
+    this.vtables.add(new VtableSingle(c.id, cb.methods, cb.fields));
 
+    // tmpVars represents the locals declared in main
     this.tmpVars = new LinkedList<Dec.T>();
-
+    // There is only one statement in main.
     c.stm.accept(this);
     MainMethod.T mthd = new MainMethodSingle(
         this.tmpVars, this.stm);
