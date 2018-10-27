@@ -161,6 +161,10 @@ public class Ast
   {
     public static abstract class T implements ast.Acceptable
     {
+      public int lineNum;
+      public T(int lineNum) {
+        this.lineNum = lineNum;
+      }
     }
 
     // +
@@ -169,8 +173,9 @@ public class Ast
       public T left;
       public T right;
 
-      public Add(T left, T right)
+      public Add(T left, T right, int lineNum)
       {
+        super(lineNum);
         this.left = left;
         this.right = right;
       }
@@ -189,8 +194,9 @@ public class Ast
       public T left;
       public T right;
 
-      public And(T left, T right)
+      public And(T left, T right, int lineNum)
       {
+        super(lineNum);
         this.left = left;
         this.right = right;
       }
@@ -209,8 +215,9 @@ public class Ast
       public T array;
       public T index;
 
-      public ArraySelect(T array, T index)
+      public ArraySelect(T array, T index, int lineNum)
       {
+        super(lineNum);
         this.array = array;
         this.index = index;
       }
@@ -233,8 +240,9 @@ public class Ast
       public java.util.LinkedList<Type.T> at; // arg's type
       public Type.T rt;
 
-      public Call(T exp, String id, java.util.LinkedList<T> args)
+      public Call(T exp, String id, java.util.LinkedList<T> args, int lineNum)
       {
+        super(lineNum);
         this.exp = exp;
         this.id = id;
         this.args = args;
@@ -252,8 +260,9 @@ public class Ast
     // False
     public static class False extends T
     {
-      public False()
+      public False(int lineNum)
       {
+        super(lineNum);
       }
 
       @Override
@@ -271,15 +280,17 @@ public class Ast
       public Type.T type; // type of the id
       public boolean isField; // whether or not this is a class field
 
-      public Id(String id)
+      public Id(String id, int lineNum)
       {
+        super(lineNum);
         this.id = id;
         this.type = null;
         this.isField = false;
       }
 
-      public Id(String id, Type.T type, boolean isField)
+      public Id(String id, Type.T type, boolean isField, int lineNum)
       {
+        super(lineNum);
         this.id = id;
         this.type = type;
         this.isField = isField;
@@ -293,13 +304,14 @@ public class Ast
       }
     }
 
-    // length
+    // -> AtomExp .length
     public static class Length extends T
     {
       public T array;
 
-      public Length(T array)
+      public Length(T array, int lineNum)
       {
+        super(lineNum);
         this.array = array;
       }
 
@@ -317,8 +329,9 @@ public class Ast
       public T left;
       public T right;
 
-      public Lt(T left, T right)
+      public Lt(T left, T right, int lineNum)
       {
+        super(lineNum);
         this.left = left;
         this.right = right;
       }
@@ -336,8 +349,9 @@ public class Ast
     {
       public T exp;
 
-      public NewIntArray(T exp)
+      public NewIntArray(T exp, int lineNum)
       {
+        super(lineNum);
         this.exp = exp;
       }
 
@@ -354,8 +368,9 @@ public class Ast
     {
       public String id;
 
-      public NewObject(String id)
+      public NewObject(String id, int lineNum)
       {
+        super(lineNum);
         this.id = id;
       }
 
@@ -372,8 +387,9 @@ public class Ast
     {
       public T exp;
 
-      public Not(T exp)
+      public Not(T exp, int lineNum)
       {
+        super(lineNum);
         this.exp = exp;
       }
 
@@ -390,8 +406,9 @@ public class Ast
     {
       public int num;
 
-      public Num(int num)
+      public Num(int num, int lineNum)
       {
+        super(lineNum);
         this.num = num;
       }
 
@@ -409,8 +426,9 @@ public class Ast
       public T left;
       public T right;
 
-      public Sub(T left, T right)
+      public Sub(T left, T right, int lineNum)
       {
+        super(lineNum);
         this.left = left;
         this.right = right;
       }
@@ -426,8 +444,9 @@ public class Ast
     // this
     public static class This extends T
     {
-      public This()
+      public This(int lineNum)
       {
+        super(lineNum);
       }
 
       @Override
@@ -444,8 +463,9 @@ public class Ast
       public T left;
       public T right;
 
-      public Times(T left, T right)
+      public Times(T left, T right, int lineNum)
       {
+        super(lineNum);
         this.left = left;
         this.right = right;
       }
@@ -461,8 +481,9 @@ public class Ast
     // True
     public static class True extends T
     {
-      public True()
+      public True(int lineNum)
       {
+        super(lineNum);
       }
 
       @Override
@@ -489,12 +510,22 @@ public class Ast
       public String id;
       public Exp.T exp;
       public Type.T type; // type of the id
+      public boolean isField;
 
       public Assign(String id, Exp.T exp)
       {
         this.id = id;
         this.exp = exp;
         this.type = null;
+        this.isField = false;
+      }
+
+      public Assign(String id, Exp.T exp, boolean isField)
+      {
+        this.id = id;
+        this.exp = exp;
+        this.type = null;
+        this.isField = isField;
       }
 
       @Override
@@ -510,12 +541,22 @@ public class Ast
       public String id;
       public Exp.T index;
       public Exp.T exp;
+      public boolean isField;
 
       public AssignArray(String id, Exp.T index, Exp.T exp)
       {
         this.id = id;
         this.index = index;
         this.exp = exp;
+        this.isField = false;
+      }
+
+      public AssignArray(String id, Exp.T index, Exp.T exp, boolean isField)
+      {
+        this.id = id;
+        this.index = index;
+        this.exp = exp;
+        this.isField = isField;
       }
 
       @Override
