@@ -1,3 +1,8 @@
 # Compiled class file
 *.class
+
+# Compiled java.c file
 *.java.c
+
+# Executables
+*.exe
