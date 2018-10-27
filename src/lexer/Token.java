@@ -53,6 +53,7 @@ public class Token
     TOKEN_TIMES, // "*"
     TOKEN_TRUE, // "true"
     TOKEN_VOID, // "void"
+    TOKEN_UNKNOWN, // unknown token
     TOKEN_WHILE, // "while"
   }
 
