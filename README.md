@@ -15,4 +15,7 @@ java -cp bin Tiger ./test/Factorial.java -testlexer
 # Print the AST
 java -cp bin Tiger <inputFile> -dump ast
 
+# Compile and generate the C code
+java -cp bin Tiger <inputFile> -codegen C
+
 ```
